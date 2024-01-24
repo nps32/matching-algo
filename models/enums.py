@@ -25,7 +25,6 @@ class Subject(Enum):
     GEO = 'Geometry'
     CALC = 'Calculus'
    
-
     #Sciences 
     BIO = 'Biology'
     CHEM = 'Chemistry'
@@ -52,3 +51,9 @@ class Subject(Enum):
     ACT_MATH = 'ACT Math'
     
     COLLEGE_APP = 'College Applications'
+
+class Grade(Enum): 
+    LE = 'Lower Elementary'
+    HE = 'Higher Elementary'
+    MI = 'Middle School'
+    HS = 'High School'

@@ -2,10 +2,11 @@ from enums import *
 
 class Tutee:
 
-     def __init__(self, id, cycle, availability, subject1, eval1, subject2, eval2, subject3, eval3, match_count, capacity, wants_prev_fellow=None, prev_fellow_id=None):
+     def __init__(self, id, cycle, availability, grade, subject1, eval1, subject2, eval2, subject3, eval3, match_count, capacity, wants_prev_fellow=None, prev_fellow_id=None):
         self.id = id #primary key 
         self.cycle = cycle
         self.availability = availability 
+        self.grade = grade
 
         #subject needs 
         self.subject1 = subject1 
@@ -28,6 +29,7 @@ class Tutee:
         print(f"ID: {self.id}")
         print(f"Cycle: {self.cycle}")
         print(f"Availability: {self.availability}")
+        print(f"Grade: {self.grade}")
 
         print("Subject Needs:")
         print(f"Subject 1: {self.subject1}, Evaluation 1: {self.eval1}")
@@ -43,5 +45,5 @@ class Tutee:
         print(f"Previous Fellow ID: {self.prev_fellow_id}")
 
 # Example usage
-tutee_instance = Tutee(id=1, cycle=Cycle.SPR24, availability=[Day.MON,Day.TUE, Day.FRI, Day.SAT], subject1=Subject.SAT_MATH, eval1=1, subject2=Subject.BIO, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=0, capacity=2, wants_prev_fellow=False)
+tutee_instance = Tutee(id=1, cycle=Cycle.SPR24, availability=[Day.MON,Day.TUE, Day.FRI, Day.SAT], grade=Grade.MI, subject1=Subject.SAT_MATH, eval1=1, subject2=Subject.BIO, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=0, capacity=2, wants_prev_fellow=False)
 tutee_instance.printTutee()
