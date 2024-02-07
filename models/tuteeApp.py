@@ -30,12 +30,12 @@ class TuteeApp:
         print(f"ID: {self.id}")
         print(f"Cycle: {self.cycle}")
         print(f"Availability: {self.availability}")
-        print(f"Grade: {self.grade}")
+        print(f"Grade: {self.grade.value}")
 
         print("Subject Needs:")
-        print(f"Subject 1: {self.subject1}, Evaluation 1: {self.eval1}")
-        print(f"Subject 2: {self.subject2}, Evaluation 2: {self.eval2}")
-        print(f"Subject 3: {self.subject3}, Evaluation 3: {self.eval3}")
+        print(f"Subject 1: {self.subject1.value}, Evaluation 1: {self.eval1}")
+        print(f"Subject 2: {self.subject2.value}, Evaluation 2: {self.eval2}")
+        print(f"Subject 3: {self.subject3.value}, Evaluation 3: {self.eval3}")
 
         print("Capacity Information:")
         print(f"Match Count: {self.match_count}")
