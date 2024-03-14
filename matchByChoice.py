@@ -41,15 +41,12 @@ def createSubjHeap(tf_ref):
     return subj_heap
 
 
-
-"""
-    STILL HAVE TO WRITE 
-"""
-def matchAvailability(tuteeApp, fellowApp): 
-    return True
-
-def updateMasterLists(matches): 
-    return 
+def matchAvailability(tuteeAvailability, fellowAvailability): 
+    for tDay in tuteeAvailability: 
+        for fDay in fellowAvailability: 
+            if (tDay == fDay): 
+                return True 
+    return False 
 
 
 def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap): 
@@ -91,7 +88,7 @@ def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):
                 break
             else: 
                 for tuteeApp in matchingTuteeApps: 
-                    if matchAvailability(tuteeApp, fellowApp):  
+                    if matchAvailability(tuteeApp.availability, fellowApp.availability):  
                         # Create match
                         match = Match(tf_id=fellowApp.id, tutee_id=tuteeApp.id, subject=scarceSubject, grade=scarceGrade, cycle=fellowApp.cycle)
                 
