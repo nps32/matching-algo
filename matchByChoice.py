@@ -1,7 +1,7 @@
 from models.fellowApp import FellowApp
 from models.tuteeApp import TuteeApp
-from models.tutorSubj import TutorSubj
-from models.tutorSubj import TutorSubj
+from models.availableTF import AvailableTF
+from models.availableTF import AvailableTF
 from models.match import Match
 from models.enums import * 
 import heapq
@@ -12,20 +12,18 @@ def sortAllSubjectsByFellowCount(fellowApps):
     # Dict which will have key = (Subject, Grade)
     tf_ref = [] 
 
-    for fellow in fellowApps: 
-        for subject in fellow.subjects: 
-            for grade in fellow.grades: 
+    for fellowApp in fellowApps: 
+        for subject in fellowApp.subjects: 
+            for grade in fellowApp.grades: 
                 if (subject, grade) in tf_ref:
                    # Add fellow id to pre-existing list 
                    curr_list = tf_ref[(subject,grade)]
-                   curr_list.append(fellow.id)
+                   curr_list.append(fellowApp.id)
                 else: 
                     # Create new list of tf ids with this fellow's id 
-                    tf_ref[(subject,grade)] = [fellow.id]
+                    tf_ref[(subject,grade)] = [fellowApp.id]
 
     return tf_ref 
-                    
-
 
 
 def createSubjHeap(tf_ref): 
@@ -37,7 +35,7 @@ def createSubjHeap(tf_ref):
     for (subject, grade), id_list in tf_ref.items(): 
         if id_list is not None:  
             # Create and push onto heap for that (subject, grade) combination
-            toPush = TutorSubj(subject, grade,len(id_list))
+            toPush = AvailableTF(subject, grade,len(id_list))
             heapq.heappush(subj_heap,toPush) 
 
     return subj_heap
@@ -47,48 +45,62 @@ def createSubjHeap(tf_ref):
 """
     STILL HAVE TO WRITE 
 """
-def matchAvaliability(tutee, fellow): 
+def matchAvailability(tuteeApp, fellowApp): 
     return True
 
 def updateMasterLists(matches): 
     return 
 
 
-
-
-def matchSubjectChoice(fellows, tutees, tf_ref, subj_heap, eval): 
+def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap): 
     
-    matches = [] 
-    scarceTutorSubj = heapq.heappop(subj_heap)
+    matches = []  
 
-    grade = scarceTutorSubj.grade
-    subject = scarceTutorSubj.subj 
+    while (len(subj_heap) != 0): 
+        
+        scarceAvailableTF = heapq.heappop(subj_heap)
+        scarceGrade = scarceAvailableTF.grade
+        scarceSubject = scarceAvailableTF.subject 
 
-    # Use list comprehension to filter new list of tutees having the same grade and subject-eval combo  
-    matchingTutees = [tutee for tutee in tutees if (
-            tutee.grade == subject and   
+        # Use list comprehension to filter tutees having the same grade and subject-eval combo and appropriate match count
+        matchingTuteeApps = [tuteeApp for tuteeApp in tuteeApps if (
+            (tuteeApp.grade == scarceGrade) and 
+            (tuteeApp.matchCount < maxCap) and 
             (
-                (tutee.subject1 == subject and tutee.eval1 == eval) or 
-                (tutee.subject2 == subject and tutee.eval2 == eval) or 
-                (tutee.subject3 == subject and tutee.eval3 == eval) 
+                (tuteeApp.subject1 == scarceSubject and tuteeApp.eval1 == eval) or 
+                (tuteeApp.subject2 == scarceSubject and tuteeApp.eval2 == eval) or 
+                (tuteeApp.subject3 == scarceSubject and tuteeApp.eval3 == eval) 
             ) 
-    )] 
+        )] 
     
-    listOfIds = tf_ref[(subject,grade)]
+        # Skips subject-grade combination if no matching tutees for subj-grd-eval combination 
+        if len(matchingTuteeApps) == 0: 
+            continue
 
-    if listOfIds is not None:  
-        #Use list comprehension to filter list of fellows with matching ids as in the dict 
-        matchingFellows = [fellow for fellow in fellows if fellow.id in listOfIds]  
-    else: 
-        # SHOULD CONVERT TO LOGGING  
-        print(f"No eligible teaching fellows for {subject}-{grade} combination")
+        # Get corresponding list of TF ids from tf_ref
+        listOfIds = tf_ref[(scarceSubject,scarceGrade)]
 
-    # NOW HAVE LIST OF 'MATCHING' TUTEES & TFs' for a subj-grd-eval combo 
-    for tutee in matchingTutees: 
-        for fellow in matchingFellows: 
-            # NECESSARY TO CHECK matchCount? 
-            if matchAvaliability(tutee, fellow) and (fellow.matchCount < 2):  
-                match = Match(tf_id=fellow.id, tutee_id=tutee.id, subject=subject, grade=grade, cycle=fellow.cycle)
-                matches.append(match)
+        #Use list comprehension to filter fellows with matching ids and appropriate match count
+        matchingFellowApps = [fellowApp for fellowApp in fellowApps if ( 
+                                    fellowApp.matchCount < maxCap and 
+                                    fellowApp.id in listOfIds
+                              )]  
 
-    return matches 
+        for fellowApp in matchingFellowApps:
+            if len(matchingTuteeApps) == 0: 
+                break
+            else: 
+                for tuteeApp in matchingTuteeApps: 
+                    if matchAvailability(tuteeApp, fellowApp):  
+                        # Create match
+                        match = Match(tf_id=fellowApp.id, tutee_id=tuteeApp.id, subject=scarceSubject, grade=scarceGrade, cycle=fellowApp.cycle)
+                
+                    # Add match 
+                    matches.append(match)
+
+                    tuteeApp.match_count = tuteeApp.match_count + 1
+                    fellowApp.match_count = fellowApp.match_count + 1 
+                    # Remove matched tuteeApp from pool for next iteration  
+                    matchingTuteeApps.remove(tuteeApp) 
+            
+    return matches  
