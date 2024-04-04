@@ -1,4 +1,4 @@
-from enums import *
+from models.enums import *
 
 class TuteeApp:
 

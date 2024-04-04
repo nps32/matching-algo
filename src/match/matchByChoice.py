@@ -1,26 +1,23 @@
-from models.fellowApp import FellowApp
-from models.tuteeApp import TuteeApp
-from models.availableTF import AvailableTF
-from models.availableTF import AvailableTF
-from models.match import Match
-from models.enums import * 
+
 import heapq
 
+from src.models.availableTF import AvailableTF
+from src.models.match import Match
 
 
-def sortAllSubjectsByFellowCount(fellowApps): 
+def sortAllSubjectsByFellowCount(fellowApps):
     # Dict which will have key = (Subject, Grade)
-    tf_ref = [] 
+    tf_ref = []
 
-    for fellowApp in fellowApps: 
-        for subject in fellowApp.subjects: 
-            for grade in fellowApp.grades: 
+    for fellowApp in fellowApps:
+        for subject in fellowApp.subjects:
+            for grade in fellowApp.grades:
                 if (subject, grade) in tf_ref:
-                   # Add fellow id to pre-existing list 
+                   # Add fellow id to pre-existing list
                    curr_list = tf_ref[(subject,grade)]
                    curr_list.append(fellowApp.id)
-                else: 
-                    # Create new list of tf ids with this fellow's id 
+                else:
+                    # Create new list of tf ids with this fellow's id
                     tf_ref[(subject,grade)] = [fellowApp.id]
 
     return tf_ref 
@@ -91,13 +88,14 @@ def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):
                     if matchAvailability(tuteeApp.availability, fellowApp.availability):  
                         # Create match
                         match = Match(tf_id=fellowApp.id, tutee_id=tuteeApp.id, subject=scarceSubject, grade=scarceGrade, cycle=fellowApp.cycle)
-                
-                    # Add match 
-                    matches.append(match)
 
-                    tuteeApp.match_count = tuteeApp.match_count + 1
-                    fellowApp.match_count = fellowApp.match_count + 1 
-                    # Remove matched tuteeApp from pool for next iteration  
-                    matchingTuteeApps.remove(tuteeApp) 
+                        #Add match
+                        matches.append(match)
+
+                        tuteeApp.match_count = tuteeApp.match_count + 1
+                        fellowApp.match_count = fellowApp.match_count + 1
+
+                        # Remove matched tuteeApp from pool for next iteration
+                        matchingTuteeApps.remove(tuteeApp)
             
     return matches  
