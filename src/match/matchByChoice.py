@@ -1,8 +1,8 @@
 
 import heapq
 
-from src.models.availableTF import AvailableTF
-from src.models.match import Match
+from ..models.availableTF import AvailableTF
+from ..models.match import Match
 
 
 def sortAllSubjectsByFellowCount(fellowApps):
