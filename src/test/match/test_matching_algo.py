@@ -1,5 +1,5 @@
 from match.matchByChoice import matchAvailability
-from src.models.enums import Day
+from models.enums.Day import Day
 
 import pytest
 

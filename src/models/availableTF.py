@@ -1,5 +1,5 @@
-from .enums import Grade
-from .enums import Subject
+from .enums.Grade import Grade
+from .enums.Subject import Subject
 
 class AvailableTF: 
     def __init__(self, subject, grade, available_tfs): 
