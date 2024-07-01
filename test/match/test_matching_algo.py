@@ -1,8 +1,7 @@
-from match.matchByChoice import matchAvailability
-from models.enums.Day import Day
+from src.match.matchByChoice import matchAvailability
+from src.models.enums.Day import Day
 
 import pytest
-
 
 class TestMatchingAlgo():
     def testCheckAvailability(self):
