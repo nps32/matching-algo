@@ -1,6 +1,6 @@
-from .enums.Cycle import Cycle
-from .enums.Subject import Subject
-from .enums.Grade import Grade
+from src.models.enums.Cycle import Cycle
+from src.models.enums.Subject import Subject
+from src.models.enums.Grade import Grade
 
 class Match: 
     def __init__(self, tf_id, tutee_id, subject, grade, cycle): 

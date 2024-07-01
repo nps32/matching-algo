@@ -1,4 +1,8 @@
-from enums import *
+from src.models.enums.Subject import Subject 
+from src.models.enums.Grade import Grade
+from src.models.enums.Cycle import Cycle
+from src.models.enums.Day import Day
+
 
 class FellowApp:
 
