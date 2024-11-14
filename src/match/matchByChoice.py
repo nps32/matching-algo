@@ -6,7 +6,7 @@ from src.models.match import Match
 
 def sortAllSubjectsByFellowCount(fellowApps):
     # Dict which will have key = (Subject, Grade)
-    tf_ref = []
+    tf_ref = dict()
 
     for fellowApp in fellowApps:
         for subject in fellowApp.subjects:
@@ -98,3 +98,13 @@ def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):
                         matchingTuteeApps.remove(tuteeApp)
             
     return matches  
+
+
+# Master function for the matchByChoice stage
+def matchByChoice(fellowApps, tuteeApps, eval, maxCap): 
+
+    tf_ref = sortAllSubjectsByFellowCount(fellowApps)
+    subj_heap = createSubjHeap(tf_ref)
+    matches = matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap)
+
+    return matches 
