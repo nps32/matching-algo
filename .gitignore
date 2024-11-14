@@ -4,3 +4,5 @@ __pycache__
 venv
 .coverage
 src/models/.enums.py.swp
+test/.pytest_cache
+.pytest_cache
