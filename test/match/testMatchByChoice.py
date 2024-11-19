@@ -138,4 +138,30 @@ def test_sortAllSubjectsByFellowCount(fellow_apps, expected_tf_ref):
      # Assert that tf_ref matches the expected values
     for key, fellow_ids in expected_tf_ref.items():
         assert key in tf_ref, f"Missing key: {key}"
-        assert sorted(tf_ref[key]) == sorted(fellow_ids), f"Values for {key} don't match. Expected {fellow_ids}, but got {tf_ref[key]}"
+        assert sorted(tf_ref[key]) == sorted(fellow_ids), f"Values for {key} don't match. Expected {fellow_ids}, but got {tf_ref[key]}" 
+
+
+
+
+@pytest.fixture 
+def fellowApps2(): 
+    return [
+        FellowApp(id=2, cycle=Cycle.FALL23, availability=[Day.MON, Day.WED], grades=[Grade.HS, Grade.MI], subjects=[Subject.MATH2ALG, Subject.PHYSICS], match_count=1, capacity=2),
+        FellowApp(id=3, cycle=Cycle.FALL23, availability=[Day.MON, Day.WED], grades=[Grade.HS, Grade.MI], subjects=[Subject.MATH2ALG, Subject.PHYSICS], match_count=1, capacity=2),
+        FellowApp(id=4, cycle=Cycle.FALL23, availability=[Day.MON, Day.WED], grades=[Grade.HS, Grade.MI], subjects=[Subject.MATH2ALG, Subject.PHYSICS], match_count=1, capacity=2) ]
+
+@pytest.fixture 
+def tuteeApps(): 
+    return [
+        TuteeApp(id=1, cycle=Cycle.SPR24, availability=[Day.MON,Day.TUE, Day.FRI, Day.SAT], grade=Grade.MI, subject1=Subject.SAT_MATH, eval1=1, subject2=Subject.BIO, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=0, capacity=2, wants_prev_fellow=False, prev_fellow_name="Diego", prev_fellow_id=2)
+    ] 
+
+@pytest.fixture 
+def tf_ref3(fellowApps2): 
+    return sortAllSubjectsByFellowCount(fellowApps2)
+    
+@pytest.fixture 
+def subj_heap(tf_ref3): 
+    return createSubjHeap(tf_ref3)
+
+#def testMatchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):       
