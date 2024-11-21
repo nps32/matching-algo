@@ -12,9 +12,9 @@ def sortAllSubjectsByFellowCount(fellowApps):
         for subject in fellowApp.subjects:
             for grade in fellowApp.grades:
                 if (subject, grade) in tf_ref:
-                   # Add fellow id to pre-existing list
-                   curr_list = tf_ref[(subject,grade)]
-                   curr_list.append(fellowApp.id)
+                    # Add fellow id to pre-existing list
+                    curr_list = tf_ref[(subject,grade)]
+                    curr_list.append(fellowApp.id)
                 else:
                     # Create new list of tf ids with this fellow's id
                     tf_ref[(subject,grade)] = [fellowApp.id]
@@ -58,7 +58,7 @@ def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):
         # Use list comprehension to filter tutees having the same grade and subject-eval combo and appropriate match count
         matchingTuteeApps = [tuteeApp for tuteeApp in tuteeApps if (
             (tuteeApp.grade == scarceGrade) and 
-            (tuteeApp.matchCount < maxCap) and 
+            (tuteeApp.match_count < maxCap) and 
             (
                 (tuteeApp.subject1 == scarceSubject and tuteeApp.eval1 == eval) or 
                 (tuteeApp.subject2 == scarceSubject and tuteeApp.eval2 == eval) or 
@@ -75,7 +75,7 @@ def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):
 
         #Use list comprehension to filter fellows with matching ids and appropriate match count
         matchingFellowApps = [fellowApp for fellowApp in fellowApps if ( 
-                                    fellowApp.matchCount < maxCap and 
+                                    fellowApp.match_count < maxCap and 
                                     fellowApp.id in listOfIds
                               )]  
 
@@ -91,8 +91,8 @@ def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):
                         #Add match
                         matches.append(match)
 
-                        tuteeApp.match_count = tuteeApp.match_count + 1
-                        fellowApp.match_count = fellowApp.match_count + 1
+                        tuteeApp.match_count += 1
+                        fellowApp.match_count += 1
 
                         # Remove matched tuteeApp from pool for next iteration
                         matchingTuteeApps.remove(tuteeApp)
@@ -101,7 +101,10 @@ def matchSubjectChoice(fellowApps, tuteeApps, tf_ref, subj_heap, eval, maxCap):
 
 
 # Master function for the matchByChoice stage
-def matchByChoice(fellowApps, tuteeApps, eval, maxCap): 
+def matchByChoice(fellowApps, tuteeApps, eval, maxCap):  
+
+    # Sorts fellowApps to list returning fellows first 
+    fellowApps = sorted(fellowApps, key=lambda x: x.returning, reverse=True)
 
     tf_ref = sortAllSubjectsByFellowCount(fellowApps)
     subj_heap = createSubjHeap(tf_ref)
