@@ -6,3 +6,5 @@ venv
 src/models/.enums.py.swp
 test/.pytest_cache
 .pytest_cache
+token.txt
+site-id.txt
