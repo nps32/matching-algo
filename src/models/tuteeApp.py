@@ -28,27 +28,48 @@ class TuteeApp:
         self.prev_fellow_name = prev_fellow_name 
         self.prev_fellow_id = prev_fellow_id
 
-     def printTutee(self):
-        print("Tutee Information:")
-        print(f"ID: {self.id}")
-        print(f"Cycle: {self.cycle}")
-        print(f"Availability: {self.availability}")
-        print(f"Grade: {self.grade.value}")
+     def __str__(self):
+         return (
+            "Tutee Information:\n"
+            f"ID: {self.id}\n"
+            f"Cycle: {self.cycle}\n"
+            f"Availability: {self.availability}\n"
+            f"Grade: {self.grade.value}\n\n"
 
-        print("Subject Needs:")
-        print(f"Subject 1: {self.subject1.value}, Evaluation 1: {self.eval1}")
-        print(f"Subject 2: {self.subject2.value}, Evaluation 2: {self.eval2}")
-        print(f"Subject 3: {self.subject3.value}, Evaluation 3: {self.eval3}")
+            "Subject Needs:\n"
+            f"Subject 1: {self.subject1.value}, Evaluation 1: {self.eval1}\n"
+            f"Subject 2: {self.subject2.value}, Evaluation 2: {self.eval2}\n"
+            f"Subject 3: {self.subject3.value}, Evaluation 3: {self.eval3}\n\n"
 
-        print("Capacity Information:")
-        print(f"Match Count: {self.match_count}")
-        print(f"Capacity: {self.capacity}")
+            "Capacity Information:\n"
+            f"Match Count: {self.match_count}\n"
+            f"Capacity: {self.capacity}\n\n"
 
-        print("Returning Tutee Preferences:")
-        print(f"Wants Previous Fellow: {self.wants_prev_fellow}")
-        print(f"Previous Fellow Name: {self.prev_fellow_name}")
-        print(f"Previous Fellow ID: {self.prev_fellow_id}")
+            "Returning Tutee Preferences:\n"
+            f"Wants Previous Fellow: {self.wants_prev_fellow}\n"
+            f"Previous Fellow Name: {self.prev_fellow_name}\n"
+            f"Previous Fellow ID: {self.prev_fellow_id}\n"
+         )
 
-# Example usage
-tutee_instance = TuteeApp(id=1, cycle=Cycle.SPR24, availability=[Day.MON,Day.TUE, Day.FRI, Day.SAT], grade=Grade.MI, subject1=Subject.SAT_MATH, eval1=1, subject2=Subject.BIO, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=0, capacity=2, wants_prev_fellow=False, prev_fellow_name="Diego", prev_fellow_id=2)
-tutee_instance.printTutee()
+     def __str__(self):
+        return (
+            "Tutee Information:\n"
+            f"ID: {self.id if self.id is not None else 'None'}\n"
+            f"Cycle: {self.cycle if self.cycle is not None else 'None'}\n"
+            f"Availability: {self.availability}\n"
+            f"Grade: {self.grade.value if self.grade is not None else 'None'}\n\n"
+
+            "Subject Needs:\n"
+            f"Subject 1: {self.subject1.value if self.subject1 is not None else 'None'}, Evaluation 1: {self.eval1 if self.eval1 is not None else 'None'}\n"
+            f"Subject 2: {self.subject2.value if self.subject2 is not None else 'None'}, Evaluation 2: {self.eval2 if self.eval2 is not None else 'None'}\n"
+            f"Subject 3: {self.subject3.value if self.subject3 is not None else 'None'}, Evaluation 3: {self.eval3 if self.eval3 is not None else 'None'}\n\n"
+
+            "Capacity Information:\n"
+            f"Match Count: {self.match_count if self.match_count is not None else 'None'}\n"
+            f"Capacity: {self.capacity if self.capacity is not None else 'None'}\n\n"
+
+            "Returning Tutee Preferences:\n"
+            f"Wants Previous Fellow: {self.wants_prev_fellow}\n"
+            f"Previous Fellow Name: {self.prev_fellow_name if self.prev_fellow_name is not None else 'None'}\n"
+            f"Previous Fellow ID: {self.prev_fellow_id if self.prev_fellow_id is not None else 'None'}\n"
+        )

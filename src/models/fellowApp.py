@@ -24,24 +24,22 @@ class FellowApp:
         self.prev_tutee_name = prev_tutee_name
         self.prev_tutee_id = prev_tutee_id
 
-    def printFellow(self):
-        print("Fellow Information:")
-        print(f"ID: {self.id}")
-        print(f"Cycle: {self.cycle}")
-        print(f"Availability: {self.availability}")
+    def __str__(self):
+        return (
+            "Fellow Information:\n"
+            f"ID: {self.id if self.id is not None else 'None'}\n"
+            f"Cycle: {self.cycle if self.cycle is not None else 'None'}\n"
+            f"Availability: {self.availability}\n\n"
 
-        print("Tutoring Ability:")
-        print(f"Grades: {self.grades}")
-        print(f"Subjects: {self.subjects}")
-        print(f"Capacity: {self.capacity}")
-        print(f"Match Count: {self.match_count}")
+            "Tutoring Ability:\n"
+            f"Grades: {self.grades}\n"
+            f"Subjects: {self.subjects}\n"
+            f"Capacity: {self.capacity if self.capacity is not None else 'None'}\n"
+            f"Match Count: {self.match_count if self.match_count is not None else 'None'}\n\n"
 
-        print("Returning Fellow Preferences:")
-        print(f"Returning Fellow? {self.returning}")
-        print(f"Wants Previous Tutee: {self.wants_prev_tutee}")
-        print(f"Wants Previous Tutee: {self.prev_tutee_name}")
-        print(f"Previous Tutee ID: {self.prev_tutee_id}")
-
-# Example usage
-fellow_instance = FellowApp(id=1, cycle=Cycle.FALL23, availability=[Day.MON, Day.WED, Day.FRI], grades=[Grade.MI, Grade.HS], subjects=[Subject.MATH2ALG, Subject.PHYSICS, Subject.CHEM, Subject.CHINESE], match_count=0, capacity=1, returning=True, wants_prev_tutee=False, prev_tutee_name="Nav", prev_tutee_id=101)
-fellow_instance.printFellow()
+            "Returning Fellow Preferences:\n"
+            f"Returning Fellow? {self.returning}\n"
+            f"Wants Previous Tutee: {self.wants_prev_tutee}\n"
+            f"Previous Tutee Name: {self.prev_tutee_name if self.prev_tutee_name is not None else 'None'}\n"
+            f"Previous Tutee ID: {self.prev_tutee_id if self.prev_tutee_id is not None else 'None'}"
+        )
