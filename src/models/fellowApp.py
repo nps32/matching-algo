@@ -34,8 +34,8 @@ class FellowApp:
             "Tutoring Ability:\n"
             f"Grades: {self.grades}\n"
             f"Subjects: {self.subjects}\n"
-            f"Capacity: {self.capacity if self.capacity is not None else 'None'}\n"
-            f"Match Count: {self.match_count if self.match_count is not None else 'None'}\n\n"
+            f"Capacity: {self.capacity if self.capacity is not None else '0'}\n"
+            f"Match Count: {self.match_count if self.match_count is not None else '0'}\n\n"
 
             "Returning Fellow Preferences:\n"
             f"Returning Fellow? {self.returning}\n"

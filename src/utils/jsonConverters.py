@@ -3,14 +3,53 @@ from src.models.enums.Day import Day
 from src.models.enums.Subject import Subject
 from src.models.enums.Cycle import Cycle
 from src.models.enums.Grade import Grade
+from src.models.match import Match
 from src.models.tuteeApp import TuteeApp
 from src.models.fellowApp import FellowApp
 
+cycle_mapping = {"2bb261dd-2968-4c5b-bd05-731eaa7c3c87":Cycle.TEST, 
+                 "613958f3-cd19-4604-902b-4fffacf28672":Cycle.SPR24}
+
+grade_mapping = {'lowerElementary':Grade.LE, 
+                 'higherElementary':Grade.HE, 
+                 'middle':Grade.MI, 
+                 'highSchool':Grade.HS}
+
+day_mapping = {'Monday':Day.MON, 
+               'Tuesday':Day.TUE, 
+               'Wednesday':Day.WED, 
+               'Thursday':Day.THURS, 
+               'Friday':Day.FRI, 
+               'Saturday':Day.SAT, 
+               'Sunday':Day.SUN}
+
+subject_mapping = {'englishReading': Subject.EN_READ,
+                   'englishWriting': Subject.EN_WRIT,
+                   'history': Subject.HIST,
+                   'mathToAlgebra': Subject.MATH2ALG,
+                   'geometry': Subject.GEO,
+                   'calculus': Subject.CALC,
+                   'biology': Subject.BIO,
+                   'chemistry': Subject.CHEM,
+                   'physics': Subject.PHYSICS,
+                   'computerScience': Subject.CS,
+                   'spanish': Subject.SPANISH,
+                   'french': Subject.FRENCH,
+                   'chinese': Subject.CHINESE,
+                   'satAll': Subject.SAT,
+                   'satMath': Subject.SAT_MATH,
+                   'satReading': Subject.SAT_READ,
+                   'satWriting': Subject.SAT_WRIT,
+                   'actAll': Subject.ACT,
+                   'actEnglish': Subject.ACT_ENG,
+                   'actReading': Subject.ACT_READ,
+                   'actWriting': Subject.ACT_WRIT,
+                   'actScience': Subject.ACT_SCI,
+                   'actMath': Subject.ACT_MATH,
+                   'collegeApplications': Subject.COLLEGE_APP}
+
 
 def convertCycle(cycle : str) -> Cycle: 
-
-    cycle_mapping = {"2bb261dd-2968-4c5b-bd05-731eaa7c3c87":Cycle.TEST, 
-                     "613958f3-cd19-4604-902b-4fffacf28672":Cycle.SPR24}
 
     if cycle in cycle_mapping: 
         return cycle_mapping[cycle] 
@@ -20,11 +59,6 @@ def convertCycle(cycle : str) -> Cycle:
 
 
 def convertGrades(grades : List[str]) -> List[Grade]: 
-    
-    grade_mapping = {'lowerElementary':Grade.LE, 
-                     'higherElementary':Grade.HE, 
-                     'middle':Grade.MI, 
-                     'highSchool':Grade.HS}
     
     res = [] 
     for grade in grades: 
@@ -38,11 +72,6 @@ def convertGrades(grades : List[str]) -> List[Grade]:
 
 def convertGrade(grade : str) -> Grade: 
     
-    grade_mapping = {'lowerElementary':Grade.LE, 
-                     'higherElementary':Grade.HE, 
-                     'middle':Grade.MI, 
-                     'highSchool':Grade.HS} 
-    
     if grade in grade_mapping: 
         return grade_mapping[grade]
     else: 
@@ -51,14 +80,6 @@ def convertGrade(grade : str) -> Grade:
 
 
 def convertAvailability(availability : List[str]) -> List[Day]: 
-    
-    day_mapping = {'Monday':Day.MON, 
-                   'Tuesday':Day.TUE, 
-                   'Wednesday':Day.WED, 
-                   'Thursday':Day.THURS, 
-                   'Friday':Day.FRI, 
-                   'Saturday':Day.SAT, 
-                   'Sunday':Day.SUN}
     
     res = [] 
     for day in availability:
@@ -71,33 +92,6 @@ def convertAvailability(availability : List[str]) -> List[Day]:
 
 def convertSubjects(subjects : List[str]) -> List[Subject]: 
     
-    subject_mapping = {
-        'englishReading': Subject.EN_READ,
-        'englishWriting': Subject.EN_WRIT,
-        'history': Subject.HIST,
-        'mathToAlgebra': Subject.MATH2ALG,
-        'geometry': Subject.GEO,
-        'calculus': Subject.CALC,
-        'biology': Subject.BIO,
-        'chemistry': Subject.CHEM,
-        'physics': Subject.PHYSICS,
-        'computerScience': Subject.CS,
-        'spanish': Subject.SPANISH,
-        'french': Subject.FRENCH,
-        'chinese': Subject.CHINESE,
-        'satAll': Subject.SAT,
-        'satMath': Subject.SAT_MATH,
-        'satReading': Subject.SAT_READ,
-        'satWriting': Subject.SAT_WRIT,
-        'actAll': Subject.ACT,
-        'actEnglish': Subject.ACT_ENG,
-        'actReading': Subject.ACT_READ,
-        'actWriting': Subject.ACT_WRIT,
-        'actScience': Subject.ACT_SCI,
-        'actMath': Subject.ACT_MATH,
-        'collegeApplications': Subject.COLLEGE_APP
-    }
-    
     res = []
     for subject in subjects:
         if subject in subject_mapping:
@@ -107,33 +101,6 @@ def convertSubjects(subjects : List[str]) -> List[Subject]:
 
 
 def convertSubject(subject : str) -> Subject: 
-    
-    subject_mapping = {
-        'englishReading': Subject.EN_READ,
-        'englishWriting': Subject.EN_WRIT,
-        'history': Subject.HIST,
-        'mathToAlgebra': Subject.MATH2ALG,
-        'geometry': Subject.GEO,
-        'calculus': Subject.CALC,
-        'biology': Subject.BIO,
-        'chemistry': Subject.CHEM,
-        'physics': Subject.PHYSICS,
-        'computerScience': Subject.CS,
-        'spanish': Subject.SPANISH,
-        'french': Subject.FRENCH,
-        'chinese': Subject.CHINESE,
-        'satAll': Subject.SAT,
-        'satMath': Subject.SAT_MATH,
-        'satReading': Subject.SAT_READ,
-        'satWriting': Subject.SAT_WRIT,
-        'actAll': Subject.ACT,
-        'actEnglish': Subject.ACT_ENG,
-        'actReading': Subject.ACT_READ,
-        'actWriting': Subject.ACT_WRIT,
-        'actScience': Subject.ACT_SCI,
-        'actMath': Subject.ACT_MATH,
-        'collegeApplications': Subject.COLLEGE_APP
-    }
     
     if subject in subject_mapping:
         return subject_mapping[subject]
@@ -191,3 +158,38 @@ def convertJsonToTutees(data: Dict[str, Any]) -> List[TuteeApp]:
         tutees.append(tutee)
 
     return tutees
+
+def convertMatchesToJson(matches : List[Match]) -> List[Any]: 
+    reverse_cycle_mapping = {value: key for key, value in cycle_mapping.items()}
+    reverse_grade_mapping = {value: key for key, value in grade_mapping.items()}
+    reverse_subject_mapping = {value: key for key, value in subject_mapping.items()}
+
+    res = [] 
+
+    for match in matches: 
+        res.append({
+            'data':{
+                'tuteeApplication': match.tutee_id, 
+                'fellowApplication': match.tf_id, 
+                'cycle': reverse_cycle_mapping[match.cycle], 
+                'subject': reverse_subject_mapping[match.subject], 
+                'grade': reverse_grade_mapping[match.grade]
+            }
+        })
+
+    return res 
+
+
+def updateAppsJson(data: Dict[str, Any], apps: List[Any]) -> Dict[str, Any]: 
+    
+    appDict = {app.id: app for app in apps}
+
+    # Iterate through the JSON data and update matching fields
+    for item in data["dataItems"]:
+        appId = item.get("id")
+        if appId in appDict:
+            app = appDict[appId]
+            item["data"]["capacity"] = app.capacity
+            item["data"]["matchCount"] = app.match_count
+
+    return data['dataItems']

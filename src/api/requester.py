@@ -4,6 +4,9 @@ import requests
 from typing import Dict, List
 
 from src.models.enums.Cycle import Cycle
+from src.models.enums.Grade import Grade
+from src.models.enums.Subject import Subject
+from src.models.enums.Day import Day
 
 from src.models.tuteeApp import TuteeApp
 from src.models.fellowApp import FellowApp 
@@ -11,6 +14,8 @@ from src.models.match import Match
 
 from src.utils.jsonConverters import convertJsonToTutees
 from src.utils.jsonConverters import convertJsonToFellows
+from src.utils.jsonConverters import convertMatchesToJson
+from src.utils.jsonConverters import updateAppsJson
 
 
 class Requester: 
@@ -19,6 +24,8 @@ class Requester:
         
         # URLs for Wix API Requests 
         self.queryUrl = r'https://www.wixapis.com/wix-data/v2/items/query'
+        self.bulkInsertUrl = r'https://www.wixapis.com/wix-data/v2/bulk/items/insert'
+        self.bulkUpdateUrl = r'https://www.wixapis.com/wix-data/v2/bulk/items/update'
 
         # Extract authToken from file in directory 
         with open('token.txt', 'r') as file:
@@ -77,7 +84,8 @@ class Requester:
         # Make the request
         response = requests.post(self.queryUrl, headers=self.headers, json=data)
 
-        if response.status_code == 200:  
+        if response.status_code == 200: 
+            print(f"Response data: {response.text}") 
             tuteesJson = response.json()
         else:  
             print(f"Request to get tutees failed with status code {response.status_code}")
@@ -90,28 +98,129 @@ class Requester:
 
 
     def postMatches(self, matches : List[Match]) -> bool: 
-        return True
+
+        # Set parameters for request 
+        data = {
+            'dataCollectionId': 'Matches',
+            'returnEntity': True, 
+            'dataItems': convertMatchesToJson(matches)
+        } 
+
+        response = requests.post(self.bulkInsertUrl, headers=self.headers, json=data) 
+
+        if response.status_code == 200:  
+            print(response.text)
+            return True 
+        else:  
+            print(f"Request to post matches failed with status code {response.status_code}")
+            print(f"Response data: {response.text}")
+            return False 
 
 
-    def updateTutees(self, tutees : List[TuteeApp]) -> bool: 
-        return True 
+    def updateTutees(self, tutees : List[TuteeApp], cycle : Cycle) -> bool: 
+
+        # Set parameters for request to get tutees current data in CMS 
+        queryData = {
+            'dataCollectionId': "TuteeApplications",
+            'query': {
+                'filter': {'cycle': f"{self.cycleIDs[cycle]}"}
+            }
+        } 
+
+        # Make the request to get current tutees data in CMS 
+        queryResponse = requests.post(self.queryUrl, headers=self.headers, json=queryData)
+
+        # Ensure that initial API call was successful before proceeding 
+        if queryResponse.status_code != 200:   
+            print(f"Request to get current tutees data in CMS failed with status code {queryResponse.status_code}")
+            print(f"Response data: {queryResponse.text}")
+            return False 
+
+        # Set parameters for request to update tutees data in CMS 
+        updateData = {
+            'dataCollectionId': 'TuteeApplications',
+            'returnEntity': True, 
+            'dataItems': updateAppsJson(apps=tutees, data=queryResponse.json())
+        }  
+
+        # Make the request to update tutees data in CMS 
+        updateResponse = requests.post(self.bulkUpdateUrl, headers=self.headers, json=updateData)
+
+        if updateResponse.status_code == 200:  
+            return True 
+        else:  
+            print(f"Request to post matches failed with status code {updateResponse.status_code}")
+            print(f"Response data: {updateResponse.text}")
+            return False 
 
 
-    def updateFellows(self, fellows : List[FellowApp]) -> bool: 
-        return True
+    def updateFellows(self, fellows : List[FellowApp], cycle : Cycle) -> bool: 
+         
+        # Set parameters for request to get fellows current data in CMS 
+        queryData = {
+            'dataCollectionId': "FellowApplications",
+            'query': {
+                'filter': {'cycle': f"{self.cycleIDs[cycle]}"}
+            }
+        } 
 
-#######################################################
-##               TESTING API CALLS                   ## 
-#######################################################
+        # Make the request to get current fellows data in CMS 
+        queryResponse = requests.post(self.queryUrl, headers=self.headers, json=queryData)
 
-requester = Requester()
+        # Ensure that initial API call was successful before proceeding 
+        if queryResponse.status_code != 200:   
+            print(f"Request to get current tutees data in CMS failed with status code {queryResponse.status_code}")
+            print(f"Response data: {queryResponse.text}")
+            return False 
 
+        # Set parameters for request to update fellows data in CMS 
+        updateData = {
+            'dataCollectionId': 'FellowApplications',
+            'returnEntity': True, 
+            'dataItems': updateAppsJson(apps=fellows, data=queryResponse.json())
+        }  
+
+        # Make the request to update fellows data in CMS 
+        updateResponse = requests.post(self.bulkUpdateUrl, headers=self.headers, json=updateData)
+
+        if updateResponse.status_code == 200:  
+            return True 
+        else:  
+            print(f"Request to post matches failed with status code {updateResponse.status_code}")
+            print(f"Response data: {updateResponse.text}")
+            return False 
+
+
+#######################################################################
+##                        TESTING API CALLS                          ## 
+#######################################################################
+
+# requester = Requester()
+
+# -------------------------Test 'getFellowApps'-------------------------
+# fellows = requester.getFellowApps(cycle=Cycle.TEST)
+# for fellow in fellows: 
+#     print(fellow) 
+
+# -------------------------Test 'getTuteeApps'-------------------------
 # tutees = requester.getTuteeApps(cycle=Cycle.TEST)
-    
 # for tutee in tutees: 
 #     print(tutee)
 
-# fellows = requester.getFellowApps(cycle=Cycle.TEST)
+# -------------------------Test 'postMatches'-------------------------
+# match1 = Match(tf_id='5d6b3e24-af54-4c23-b1e8-2f3ca0ec59f6', tutee_id=44, subject=Subject.CALC, grade=Grade.HE, cycle=Cycle.TEST)
+# match2 = Match(tf_id='cd0cae6f-bf0c-4e05-84d7-25f0fb624c4a', tutee_id=101, subject=Subject.PHYSICS, grade=Grade.MI, cycle=Cycle.TEST)
+# matches = [match1, match2]
+# requester.postMatches(matches)
 
-# for fellow in fellows: 
-#     print(fellow) 
+# -------------------------Test 'updateTutees'-------------------------
+# tutee1 = TuteeApp(id='4af0bb98-69fd-49f0-82b2-67c174fa8714', cycle=Cycle.TEST, availability=[Day.MON, Day.WED], grade=Grade.MI, subject1=Subject.MATH2ALG, eval1=1, subject2=Subject.ACT_MATH, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=5, capacity=10)
+# tutee2 = TuteeApp(id='745badb9-4bc0-4c7a-8173-b6768c6d9fe2', cycle=Cycle.TEST, availability=[Day.MON, Day.WED], grade=Grade.MI, subject1=Subject.MATH2ALG, eval1=1, subject2=Subject.ACT_MATH, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=10, capacity=10)
+# tutees = [tutee1, tutee2]
+# requester.updateTutees(tutees=tutees, cycle=Cycle.TEST)
+
+# -------------------------Test 'updateFellows'-------------------------
+# fellow1 = FellowApp(id='5d6b3e24-af54-4c23-b1e8-2f3ca0ec59f6', cycle=Cycle.TEST, availability = [Day.MON, Day.SAT, Day.FRI], grades=[Grade.MI, Grade.HS], subjects=[Subject.BIO, Subject.ACT_READ], match_count=10, capacity=10) 
+# fellow2 = FellowApp(id='cd0cae6f-bf0c-4e05-84d7-25f0fb624c4a', cycle=Cycle.TEST, availability = [Day.MON, Day.SAT, Day.FRI], grades=[Grade.MI, Grade.HS], subjects=[Subject.BIO, Subject.ACT_READ], match_count=5, capacity=8) 
+# fellows = [fellow1,fellow2]
+# requester.updateFellows(fellows=fellows, cycle=Cycle.TEST)

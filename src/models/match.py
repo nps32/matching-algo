@@ -10,14 +10,12 @@ class Match:
         self.grade = grade 
         self.cycle = cycle 
 
-    def printMatch(self):
-        print("Match Information:")
-        print(f"Teaching Fellow ID: {self.tf_id}")
-        print(f"Tutee ID: {self.tutee_id}")
-        print(f"Subject: {self.subject}")
-        print(f"Grade: {self.grade}")
-        print(f"Cycle: {self.cycle}")
-
-# Example usage
-match_instance = Match(tf_id=1, tutee_id=101, subject=Subject.BIO.value, grade=Grade.LE.value, cycle=Cycle.FALL23.value)
-match_instance.printMatch()
+    def __str__(self):
+        return (
+            "Match Information:\n"
+            f"Teaching Fellow ID: {self.tf_id if self.tf_id is not None else 'None'}\n"
+            f"Tutee ID: {self.tutee_id if self.tutee_id is not None else 'None'}\n"
+            f"Subject: {self.subject if self.subject is not None else 'None'}\n"
+            f"Grade: {self.grade if self.grade is not None else 'None'}\n"
+            f"Cycle: {self.cycle if self.cycle is not None else 'None'}" 
+        )

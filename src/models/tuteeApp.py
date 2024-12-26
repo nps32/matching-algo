@@ -65,8 +65,8 @@ class TuteeApp:
             f"Subject 3: {self.subject3.value if self.subject3 is not None else 'None'}, Evaluation 3: {self.eval3 if self.eval3 is not None else 'None'}\n\n"
 
             "Capacity Information:\n"
-            f"Match Count: {self.match_count if self.match_count is not None else 'None'}\n"
-            f"Capacity: {self.capacity if self.capacity is not None else 'None'}\n\n"
+            f"Match Count: {self.match_count if self.match_count is not None else '0'}\n"
+            f"Capacity: {self.capacity if self.capacity is not None else '0'}\n\n"
 
             "Returning Tutee Preferences:\n"
             f"Wants Previous Fellow: {self.wants_prev_fellow}\n"
