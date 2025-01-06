@@ -10,12 +10,18 @@ class Match:
         self.grade = grade 
         self.cycle = cycle 
 
+    def replaceNone(self, val) -> str: 
+        if val is None: 
+            return 'None'
+        else: 
+            return val
+
     def __str__(self):
         return (
             "Match Information:\n"
-            f"Teaching Fellow ID: {self.tf_id if self.tf_id is not None else 'None'}\n"
-            f"Tutee ID: {self.tutee_id if self.tutee_id is not None else 'None'}\n"
-            f"Subject: {self.subject if self.subject is not None else 'None'}\n"
-            f"Grade: {self.grade if self.grade is not None else 'None'}\n"
-            f"Cycle: {self.cycle if self.cycle is not None else 'None'}" 
+            f"Teaching Fellow ID: {self.replaceNone(self.tf_id)}\n"
+            f"Tutee ID: {self.replaceNone(self.tutee_id)}\n"
+            f"Subject: {self.replaceNone(self.subject)}\n"
+            f"Grade: {self.replaceNone(self.grade)}\n"
+            f"Cycle: {self.replaceNone(self.cycle)}" 
         )

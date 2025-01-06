@@ -62,9 +62,15 @@ class Requester:
         if response.status_code == 200:  
             fellowsJson = response.json()
         else:  
-            print(f"Request to get fellows failed with status code {response.status_code}")
-            print(f"Response data: {response.text}")
-            return 
+            errorMessage = (
+                f"Request to get Fellow Apps failed.\n"
+                f"Status Code: {response.status_code}\n"
+                f"Response Data: {response.text}\n"
+                f"URL: {self.bulkInsertUrl}\n"
+                f"Payload: {data}"
+            )
+
+            raise RuntimeError(errorMessage)
 
         fellows = convertJsonToFellows(fellowsJson)
 
@@ -88,9 +94,15 @@ class Requester:
             print(f"Response data: {response.text}") 
             tuteesJson = response.json()
         else:  
-            print(f"Request to get tutees failed with status code {response.status_code}")
-            print(f"Response data: {response.text}")
-            return 
+            errorMessage = (
+                f"Request to get Tutee Apps failed.\n"
+                f"Status Code: {response.status_code}\n"
+                f"Response Data: {response.text}\n"
+                f"URL: {self.bulkInsertUrl}\n"
+                f"Payload: {data}"
+            )
+
+            raise RuntimeError(errorMessage)
 
         tutees = convertJsonToTutees(tuteesJson)
 
@@ -112,9 +124,15 @@ class Requester:
             print(response.text)
             return True 
         else:  
-            print(f"Request to post matches failed with status code {response.status_code}")
-            print(f"Response data: {response.text}")
-            return False 
+            errorMessage = (
+                f"Request to post Matches failed.\n"
+                f"Status Code: {response.status_code}\n"
+                f"Response Data: {response.text}\n"
+                f"URL: {self.bulkInsertUrl}\n"
+                f"Payload: {data}"
+            )
+
+            raise RuntimeError(errorMessage)
 
 
     def updateTutees(self, tutees : List[TuteeApp], cycle : Cycle) -> bool: 
@@ -132,9 +150,15 @@ class Requester:
 
         # Ensure that initial API call was successful before proceeding 
         if queryResponse.status_code != 200:   
-            print(f"Request to get current tutees data in CMS failed with status code {queryResponse.status_code}")
-            print(f"Response data: {queryResponse.text}")
-            return False 
+            errorMessage = (
+                f"Request to post get Tutee Apps to update Tutee Apps failed.\n"
+                f"Status Code: {queryResponse.status_code}\n"
+                f"Response Data: {queryResponse.text}\n"
+                f"URL: {self.bulkInsertUrl}\n"
+                f"Payload: {queryData}"
+            )
+
+            raise RuntimeError(errorMessage)
 
         # Set parameters for request to update tutees data in CMS 
         updateData = {
@@ -149,9 +173,15 @@ class Requester:
         if updateResponse.status_code == 200:  
             return True 
         else:  
-            print(f"Request to post matches failed with status code {updateResponse.status_code}")
-            print(f"Response data: {updateResponse.text}")
-            return False 
+            errorMessage = (
+                f"Request to update Tutee Apps failed.\n"
+                f"Status Code: {updateResponse.status_code}\n"
+                f"Response Data: {updateResponse.text}\n"
+                f"URL: {updateResponse.bulkInsertUrl}\n"
+                f"Payload: {updateData}"
+            )
+
+            raise RuntimeError(errorMessage)
 
 
     def updateFellows(self, fellows : List[FellowApp], cycle : Cycle) -> bool: 
@@ -169,9 +199,13 @@ class Requester:
 
         # Ensure that initial API call was successful before proceeding 
         if queryResponse.status_code != 200:   
-            print(f"Request to get current tutees data in CMS failed with status code {queryResponse.status_code}")
-            print(f"Response data: {queryResponse.text}")
-            return False 
+             errorMessage = (
+                f"Request to post get Fellow Apps to update Fellow Apps failed.\n"
+                f"Status Code: {queryResponse.status_code}\n"
+                f"Response Data: {queryResponse.text}\n"
+                f"URL: {self.bulkInsertUrl}\n"
+                f"Payload: {queryData}"
+            )
 
         # Set parameters for request to update fellows data in CMS 
         updateData = {
@@ -186,9 +220,15 @@ class Requester:
         if updateResponse.status_code == 200:  
             return True 
         else:  
-            print(f"Request to post matches failed with status code {updateResponse.status_code}")
-            print(f"Response data: {updateResponse.text}")
-            return False 
+            errorMessage = (
+                f"Request to update Fellow Apps failed.\n"
+                f"Status Code: {updateResponse.status_code}\n"
+                f"Response Data: {updateResponse.text}\n"
+                f"URL: {updateResponse.bulkInsertUrl}\n"
+                f"Payload: {updateData}"
+            )
+
+            raise RuntimeError(errorMessage)
 
 
 #######################################################################

@@ -7,8 +7,8 @@ from src.models.match import Match
 from src.models.tuteeApp import TuteeApp
 from src.models.fellowApp import FellowApp
 
-cycle_mapping = {"2bb261dd-2968-4c5b-bd05-731eaa7c3c87":Cycle.TEST, 
-                 "613958f3-cd19-4604-902b-4fffacf28672":Cycle.SPR24}
+cycle_mapping = {'2bb261dd-2968-4c5b-bd05-731eaa7c3c87':Cycle.TEST, 
+                 '613958f3-cd19-4604-902b-4fffacf28672':Cycle.SPR24}
 
 grade_mapping = {'lowerElementary':Grade.LE, 
                  'higherElementary':Grade.HE, 
@@ -50,24 +50,24 @@ subject_mapping = {'englishReading': Subject.EN_READ,
 
 
 def convertCycle(cycle : str) -> Cycle: 
-
     if cycle in cycle_mapping: 
         return cycle_mapping[cycle] 
     else: 
-        print(f"Warning: cycle '{cycle}' did not convert correctly. Returning null.")   
-        return None 
+        errorMessage = f"'{cycle}' cannot not convert correctly to a Cycle enum."
+        raise(ValueError(errorMessage)) 
 
 
 def convertGrades(grades : List[str]) -> List[Grade]: 
     
-    res = [] 
+    enumGrades = [] 
     for grade in grades: 
         if grade in grade_mapping:
-            res.append(grade_mapping[grade])
+            enumGrades.append(grade_mapping[grade])
         else: 
-            print(f"Warning: grade '{grade}' did not convert correctly. Skipping.")
+            errorMessage = f"'{grade}' cannot not convert correctly to a Grade enum."
+            raise(ValueError(errorMessage)) 
 
-    return res 
+    return enumGrades 
 
 
 def convertGrade(grade : str) -> Grade: 
@@ -75,29 +75,34 @@ def convertGrade(grade : str) -> Grade:
     if grade in grade_mapping: 
         return grade_mapping[grade]
     else: 
-        print(f"Warning: grade '{grade}' did not convert correctly. Returning null.")
-        return None 
+        errorMessage = f"'{grade}' cannot not convert correctly to a Grade enum."
+        raise(ValueError(errorMessage)) 
 
 
 def convertAvailability(availability : List[str]) -> List[Day]: 
     
-    res = [] 
+    matchesJson = [] 
     for day in availability:
         if day in day_mapping: 
-            res.append(day_mapping[day])
+            matchesJson.append(day_mapping[day])
         else: 
-            print(f"Warning: Day '{day}' did not convert correctly. Skipping.")
-    return res 
+            errorMessage = f"'{day}' cannot not convert correctly to a Day enum."
+            raise(ValueError(errorMessage)) 
+
+    return matchesJson 
 
 
 def convertSubjects(subjects : List[str]) -> List[Subject]: 
     
-    res = []
+    enumSubjects = []
     for subject in subjects:
         if subject in subject_mapping:
-            res.append(subject_mapping[subject])
+            enumSubjects.append(subject_mapping[subject])
+        else: 
+            errorMessage = f"'{subject}' cannot not convert correctly to a Subject enum."
+            raise(ValueError(errorMessage)) 
     
-    return res
+    return enumSubjects
 
 
 def convertSubject(subject : str) -> Subject: 
@@ -105,8 +110,8 @@ def convertSubject(subject : str) -> Subject:
     if subject in subject_mapping:
         return subject_mapping[subject]
     else: 
-        print(f"Warning: Subject '{subject}' did not convert correctly. Returning null.")
-        return None 
+        errorMessage = f"'{subject}' cannot not convert correctly to a Subject enum."
+        raise(ValueError(errorMessage)) 
 
 
 def convertJsonToFellows(data: Dict[str, Any]) -> List[FellowApp]: 
@@ -160,14 +165,16 @@ def convertJsonToTutees(data: Dict[str, Any]) -> List[TuteeApp]:
     return tutees
 
 def convertMatchesToJson(matches : List[Match]) -> List[Any]: 
+    # Reverses the mapping dicts so key-value format is {Enum:'str'}
     reverse_cycle_mapping = {value: key for key, value in cycle_mapping.items()}
     reverse_grade_mapping = {value: key for key, value in grade_mapping.items()}
     reverse_subject_mapping = {value: key for key, value in subject_mapping.items()}
 
-    res = [] 
+    # List of dicts which represent individual Match objects in the JSON format required
+    matchesJson = [] 
 
     for match in matches: 
-        res.append({
+        matchesJson.append({
             'data':{
                 'tuteeApplication': match.tutee_id, 
                 'fellowApplication': match.tf_id, 
@@ -177,7 +184,7 @@ def convertMatchesToJson(matches : List[Match]) -> List[Any]:
             }
         })
 
-    return res 
+    return matchesJson 
 
 
 def updateAppsJson(data: Dict[str, Any], apps: List[Any]) -> Dict[str, Any]: 
@@ -189,7 +196,6 @@ def updateAppsJson(data: Dict[str, Any], apps: List[Any]) -> Dict[str, Any]:
         appId = item.get("id")
         if appId in appDict:
             app = appDict[appId]
-            item["data"]["capacity"] = app.capacity
             item["data"]["matchCount"] = app.match_count
 
     return data['dataItems']
