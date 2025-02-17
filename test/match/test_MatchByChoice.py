@@ -5,7 +5,6 @@ import heapq
 from src.match.matchByChoice import sortAllSubjectsByFellowCount
 from src.match.matchByChoice import matchAvailability
 from src.match.matchByChoice import createSubjHeap
-from src.match.matchByChoice import matchSubjectChoice
 from src.match.matchByChoice import matchByChoice
 from src.models.enums.Day import Day
 from src.models.enums.Cycle import Cycle 
@@ -13,7 +12,6 @@ from src.models.enums.Grade import Grade
 from src.models.enums.Subject import Subject
 from src.models.fellowApp import FellowApp
 from src.models.tuteeApp import TuteeApp
-from src.models.match import Match
 
 
 def testCheckAvailability():

@@ -1,6 +1,8 @@
 import json
 import requests
+import boto3
 
+from botocore.exceptions import ClientError
 from typing import Dict, List
 
 from src.models.enums.Cycle import Cycle
@@ -9,258 +11,214 @@ from src.models.enums.Subject import Subject
 from src.models.enums.Day import Day
 
 from src.models.tuteeApp import TuteeApp
-from src.models.fellowApp import FellowApp 
+from src.models.fellowApp import FellowApp
 from src.models.match import Match
 
-from src.utils.jsonConverters import convertJsonToTutees
-from src.utils.jsonConverters import convertJsonToFellows
-from src.utils.jsonConverters import convertMatchesToJson
-from src.utils.jsonConverters import updateAppsJson
+from src.utils.jsonConverters import (
+    convertJsonToTutees,
+    convertJsonToFellows,
+    convertMatchesToJson,
+    updateAppsJson
+)
 
 
-class Requester: 
+class Requester:
+    """
+    Handles API requests to Wix CMS for retrieving and updating application data.
+    """
 
-    def __init__(self): 
-        
-        # URLs for Wix API Requests 
-        self.queryUrl = r'https://www.wixapis.com/wix-data/v2/items/query'
-        self.bulkInsertUrl = r'https://www.wixapis.com/wix-data/v2/bulk/items/insert'
-        self.bulkUpdateUrl = r'https://www.wixapis.com/wix-data/v2/bulk/items/update'
+    def __init__(self):
 
-        # Extract authToken from file in directory 
+        # URLs for Wix API Requests
+        self.query_url = r'https://www.wixapis.com/wix-data/v2/items/query'
+        self.bulk_insert_url = r'https://www.wixapis.com/wix-data/v2/bulk/items/insert'
+        self.bulk_update_url = r'https://www.wixapis.com/wix-data/v2/bulk/items/update'
+
+        # Extract authentication token from a local file
         with open('token.txt', 'r') as file:
-            self.authToken = file.read().strip()     
+            self.auth_token = file.read().strip()
+        # TODO: replace when integrated with AWS Secrets Manager 
+        # self.auth_token = self.get_secret()
 
-        # Extract authToken from file in directory 
-        with open('site-id.txt','r') as file: 
-            self.siteId = file.read().strip()
+        # Unique identifier for Hatch's Wix site
+        self.site_id = 'fc608cb7-1555-4c42-b6b8-b3416ee6a801'
 
+        # Construct required header for API calls 
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {self.authToken}',  
-            'wix-site-id': f'{self.siteId}'
+            'Authorization': f'Bearer {self.auth_token}',
+            'wix-site-id': self.site_id
         }
 
-        # Needed to request a specific Cycle 
-        self.cycleIDs = {Cycle.TEST:"2bb261dd-2968-4c5b-bd05-731eaa7c3c87",
-                         Cycle.SPR24:"613958f3-cd19-4604-902b-4fffacf28672"}
+        # Mapping cycle enums to Wix cycle IDs
+        self.cycle_ids = {
+            Cycle.TEST: "2bb261dd-2968-4c5b-bd05-731eaa7c3c87",
+            Cycle.SPR24: "613958f3-cd19-4604-902b-4fffacf28672"
+        }
 
+    @staticmethod
+    def get_secret():
+        """
+        Retrieves API key from AWS Secrets Manager.
+        """
+        
+        session = boto3.session.Session()
+        client = session.client(service_name='secretsmanager', region_name='eu-north-1')
 
-    def getFellowApps(self, cycle : Cycle) -> List[FellowApp]: 
-         
-        # Set parameters for request 
+        try:
+            secret_response = client.get_secret_value(SecretId='prod/matchingLambda/wixKey')
+        except ClientError as e:
+            error_message = (
+                f"ClientError occurred.\n"
+                f"Error Code: {e.response['Error']['Code']}\n"
+                f"Error Message: {e.response['Error']['Message']}\n"
+                f"Request ID: {e.response['ResponseMetadata']['RequestId']}\n"
+                f"HTTP Status Code: {e.response['ResponseMetadata']['HTTPStatusCode']}"
+            )
+            print(error_message) #TODO: Change to CloudWatch logging
+            raise e
+
+        return secret_response['SecretString']
+
+    def get_fellow_apps(self, cycle: Cycle) -> List[FellowApp]:
+        """
+        Fetch Fellow applications from Wix CMS for a given cycle.
+        """
+        
         data = {
             'dataCollectionId': "FellowApplications",
-            'query': {
-                'filter': {'cycle': f"{self.cycleIDs[cycle]}"}
-            }
-        } 
+            'query': {'filter': {'cycle': self.cycle_ids[cycle]}} # Send request for specific cycle 
+        }
 
-        # Make the request
-        response = requests.post(self.queryUrl, headers=self.headers, json=data)
+        response = requests.post(self.query_url, headers=self.headers, json=data)
 
-        if response.status_code == 200:  
-            fellowsJson = response.json()
-        else:  
-            errorMessage = (
+        if response.status_code == 200:
+            return convertJsonToFellows(response.json()) # Use util function to return a list of FellowApp objects
+        else: 
+            error_message = (
                 f"Request to get Fellow Apps failed.\n"
                 f"Status Code: {response.status_code}\n"
-                f"Response Data: {response.text}\n"
-                f"URL: {self.bulkInsertUrl}\n"
-                f"Payload: {data}"
+                f"Response Data: {response.text}"
             )
+            raise RuntimeError(error_message)
 
-            raise RuntimeError(errorMessage)
+    def get_tutee_apps(self, cycle: Cycle) -> List[TuteeApp]:
+        """
+        Fetch Tutee applications from Wix CMS for a given cycle.
+        """
 
-        fellows = convertJsonToFellows(fellowsJson)
-
-        return fellows
-        
-
-    def getTuteeApps(self, cycle : Cycle) -> List[TuteeApp]: 
-        
-        # Set parameters for request 
         data = {
             'dataCollectionId': "TuteeApplications",
-            'query': {
-                'filter': {'cycle': f"{self.cycleIDs[cycle]}"}
-            }
-        } 
+            'query': {'filter': {'cycle': self.cycle_ids[cycle]}} # Send request for specific cycle 
+        }
 
-        # Make the request
-        response = requests.post(self.queryUrl, headers=self.headers, json=data)
+        response = requests.post(self.query_url, headers=self.headers, json=data)
 
-        if response.status_code == 200: 
-            print(f"Response data: {response.text}") 
-            tuteesJson = response.json()
-        else:  
-            errorMessage = (
+        if response.status_code == 200:
+            return convertJsonToTutees(response.json()) # Use util function to return a list of TuteeApp objects
+        else:
+            error_message = (
                 f"Request to get Tutee Apps failed.\n"
                 f"Status Code: {response.status_code}\n"
-                f"Response Data: {response.text}\n"
-                f"URL: {self.bulkInsertUrl}\n"
-                f"Payload: {data}"
+                f"Response Data: {response.text}"
             )
+            raise RuntimeError(error_message)
 
-            raise RuntimeError(errorMessage)
+    def post_matches(self, matches: List[Match]) -> bool:
+        """
+        Post match data to Wix CMS.
+        """
 
-        tutees = convertJsonToTutees(tuteesJson)
-
-        return tutees
-
-
-    def postMatches(self, matches : List[Match]) -> bool: 
-
-        # Set parameters for request 
         data = {
             'dataCollectionId': 'Matches',
-            'returnEntity': True, 
-            'dataItems': convertMatchesToJson(matches)
-        } 
+            'returnEntity': True,
+            'dataItems': convertMatchesToJson(matches) # Use util function to translate match objects to proper JSON format
+        }
 
-        response = requests.post(self.bulkInsertUrl, headers=self.headers, json=data) 
+        response = requests.post(self.bulk_insert_url, headers=self.headers, json=data)
 
-        if response.status_code == 200:  
-            print(response.text)
-            return True 
-        else:  
-            errorMessage = (
+        if response.status_code == 200:
+            return True
+        else: 
+            error_message = (
                 f"Request to post Matches failed.\n"
                 f"Status Code: {response.status_code}\n"
-                f"Response Data: {response.text}\n"
-                f"URL: {self.bulkInsertUrl}\n"
-                f"Payload: {data}"
+                f"Response Data: {response.text}"
             )
+            raise RuntimeError(error_message)
 
-            raise RuntimeError(errorMessage)
+    def update_tutees(self, tutees: List[TuteeApp], cycle: Cycle) -> bool:
+        """
+        Update tutee data in Wix CMS.
+        """
 
-
-    def updateTutees(self, tutees : List[TuteeApp], cycle : Cycle) -> bool: 
-
-        # Set parameters for request to get tutees current data in CMS 
-        queryData = {
+        query_data = {
             'dataCollectionId': "TuteeApplications",
-            'query': {
-                'filter': {'cycle': f"{self.cycleIDs[cycle]}"}
-            }
-        } 
+            'query': {'filter': {'cycle': self.cycle_ids[cycle]}}
+        }
 
-        # Make the request to get current tutees data in CMS 
-        queryResponse = requests.post(self.queryUrl, headers=self.headers, json=queryData)
+        query_response = requests.post(self.query_url, headers=self.headers, json=query_data)
 
-        # Ensure that initial API call was successful before proceeding 
-        if queryResponse.status_code != 200:   
-            errorMessage = (
-                f"Request to post get Tutee Apps to update Tutee Apps failed.\n"
-                f"Status Code: {queryResponse.status_code}\n"
-                f"Response Data: {queryResponse.text}\n"
-                f"URL: {self.bulkInsertUrl}\n"
-                f"Payload: {queryData}"
+        if query_response.status_code != 200:
+            error_message = (
+                f"Request to get Tutee Apps for update failed.\n"
+                f"Status Code: {query_response.status_code}\n"
+                f"Response Data: {query_response.text}"
             )
+            raise RuntimeError(error_message)
 
-            raise RuntimeError(errorMessage)
-
-        # Set parameters for request to update tutees data in CMS 
-        updateData = {
+        update_data = {
             'dataCollectionId': 'TuteeApplications',
-            'returnEntity': True, 
-            'dataItems': updateAppsJson(apps=tutees, data=queryResponse.json())
-        }  
+            'returnEntity': True,
+            'dataItems': updateAppsJson(apps=tutees, data=query_response.json())
+        }
 
-        # Make the request to update tutees data in CMS 
-        updateResponse = requests.post(self.bulkUpdateUrl, headers=self.headers, json=updateData)
+        update_response = requests.post(self.bulk_update_url, headers=self.headers, json=update_data)
 
-        if updateResponse.status_code == 200:  
+        if update_response.status_code == 200:
             return True 
-        else:  
-            errorMessage = (
+        else: 
+            error_message = (
                 f"Request to update Tutee Apps failed.\n"
-                f"Status Code: {updateResponse.status_code}\n"
-                f"Response Data: {updateResponse.text}\n"
-                f"URL: {updateResponse.bulkInsertUrl}\n"
-                f"Payload: {updateData}"
+                f"Status Code: {update_response.status_code}\n"
+                f"Response Data: {update_response.text}"
             )
+            raise RuntimeError(error_message)
 
-            raise RuntimeError(errorMessage)
+    def update_fellows(self, fellows: List[FellowApp], cycle: Cycle) -> bool:
+        """
+        Update fellow capacity data in Wix CMS. 
+        """
 
-
-    def updateFellows(self, fellows : List[FellowApp], cycle : Cycle) -> bool: 
-         
-        # Set parameters for request to get fellows current data in CMS 
-        queryData = {
+        query_data = {
             'dataCollectionId': "FellowApplications",
-            'query': {
-                'filter': {'cycle': f"{self.cycleIDs[cycle]}"}
-            }
-        } 
+            'query': {'filter': {'cycle': self.cycle_ids[cycle]}}
+        }
 
-        # Make the request to get current fellows data in CMS 
-        queryResponse = requests.post(self.queryUrl, headers=self.headers, json=queryData)
+        query_response = requests.post(self.query_url, headers=self.headers, json=query_data)
 
-        # Ensure that initial API call was successful before proceeding 
-        if queryResponse.status_code != 200:   
-             errorMessage = (
-                f"Request to post get Fellow Apps to update Fellow Apps failed.\n"
-                f"Status Code: {queryResponse.status_code}\n"
-                f"Response Data: {queryResponse.text}\n"
-                f"URL: {self.bulkInsertUrl}\n"
-                f"Payload: {queryData}"
+        if query_response.status_code != 200:
+            error_message = (
+                f"Request to get Fellow Apps for update failed.\n"
+                f"Status Code: {query_response.status_code}\n"
+                f"Response Data: {query_response.text}"
             )
+            raise RuntimeError(error_message)
 
-        # Set parameters for request to update fellows data in CMS 
-        updateData = {
+        update_data = {
             'dataCollectionId': 'FellowApplications',
-            'returnEntity': True, 
-            'dataItems': updateAppsJson(apps=fellows, data=queryResponse.json())
-        }  
+            'returnEntity': True,
+            'dataItems': updateAppsJson(apps=fellows, data=query_response.json())
+        }
 
-        # Make the request to update fellows data in CMS 
-        updateResponse = requests.post(self.bulkUpdateUrl, headers=self.headers, json=updateData)
+        update_response = requests.post(self.bulk_update_url, headers=self.headers, json=update_data)
 
-        if updateResponse.status_code == 200:  
-            return True 
-        else:  
-            errorMessage = (
+        if update_response.status_code == 200:
+            return True
+        else:
+            error_message = (
                 f"Request to update Fellow Apps failed.\n"
-                f"Status Code: {updateResponse.status_code}\n"
-                f"Response Data: {updateResponse.text}\n"
-                f"URL: {updateResponse.bulkInsertUrl}\n"
-                f"Payload: {updateData}"
+                f"Status Code: {update_response.status_code}\n"
+                f"Response Data: {update_response.text}"
             )
-
-            raise RuntimeError(errorMessage)
-
-
-#######################################################################
-##                        TESTING API CALLS                          ## 
-#######################################################################
-
-# requester = Requester()
-
-# -------------------------Test 'getFellowApps'-------------------------
-# fellows = requester.getFellowApps(cycle=Cycle.TEST)
-# for fellow in fellows: 
-#     print(fellow) 
-
-# -------------------------Test 'getTuteeApps'-------------------------
-# tutees = requester.getTuteeApps(cycle=Cycle.TEST)
-# for tutee in tutees: 
-#     print(tutee)
-
-# -------------------------Test 'postMatches'-------------------------
-# match1 = Match(tf_id='5d6b3e24-af54-4c23-b1e8-2f3ca0ec59f6', tutee_id=44, subject=Subject.CALC, grade=Grade.HE, cycle=Cycle.TEST)
-# match2 = Match(tf_id='cd0cae6f-bf0c-4e05-84d7-25f0fb624c4a', tutee_id=101, subject=Subject.PHYSICS, grade=Grade.MI, cycle=Cycle.TEST)
-# matches = [match1, match2]
-# requester.postMatches(matches)
-
-# -------------------------Test 'updateTutees'-------------------------
-# tutee1 = TuteeApp(id='4af0bb98-69fd-49f0-82b2-67c174fa8714', cycle=Cycle.TEST, availability=[Day.MON, Day.WED], grade=Grade.MI, subject1=Subject.MATH2ALG, eval1=1, subject2=Subject.ACT_MATH, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=5, capacity=10)
-# tutee2 = TuteeApp(id='745badb9-4bc0-4c7a-8173-b6768c6d9fe2', cycle=Cycle.TEST, availability=[Day.MON, Day.WED], grade=Grade.MI, subject1=Subject.MATH2ALG, eval1=1, subject2=Subject.ACT_MATH, eval2=3, subject3=Subject.CHEM, eval3=4, match_count=10, capacity=10)
-# tutees = [tutee1, tutee2]
-# requester.updateTutees(tutees=tutees, cycle=Cycle.TEST)
-
-# -------------------------Test 'updateFellows'-------------------------
-# fellow1 = FellowApp(id='5d6b3e24-af54-4c23-b1e8-2f3ca0ec59f6', cycle=Cycle.TEST, availability = [Day.MON, Day.SAT, Day.FRI], grades=[Grade.MI, Grade.HS], subjects=[Subject.BIO, Subject.ACT_READ], match_count=10, capacity=10) 
-# fellow2 = FellowApp(id='cd0cae6f-bf0c-4e05-84d7-25f0fb624c4a', cycle=Cycle.TEST, availability = [Day.MON, Day.SAT, Day.FRI], grades=[Grade.MI, Grade.HS], subjects=[Subject.BIO, Subject.ACT_READ], match_count=5, capacity=8) 
-# fellows = [fellow1,fellow2]
-# requester.updateFellows(fellows=fellows, cycle=Cycle.TEST)
+            raise RuntimeError(error_message)

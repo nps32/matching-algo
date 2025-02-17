@@ -2,6 +2,9 @@ from enum import Enum
 
 
 class Subject(Enum):
+    """
+    Enum representing subjects to be tutored in.
+    """
     # Humanities
     EN_READ = 'English Reading'
     EN_WRIT = 'English Writing'

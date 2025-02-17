@@ -2,7 +2,10 @@ from enum import Enum
 
 
 class Grade(Enum):
-    LE = 'Lower Elementary'
-    HE = 'Higher Elementary'
-    MI = 'Middle School'
-    HS = 'High School'
+    """
+    Enum representing the different grade ranges for tutoring.
+    """
+    LE = "Lower Elementary"
+    HE = "Higher Elementary"
+    MI = "Middle School"
+    HS = "High School"
